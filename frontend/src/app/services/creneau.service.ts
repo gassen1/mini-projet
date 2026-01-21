@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Creneau } from '../models/creneau.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CreneauService {
-    private apiUrl = 'http://localhost:8081/api/creneaux';
+    private apiUrl = `${environment.apiUrl}/creneaux`;
 
     constructor(private http: HttpClient) { }
 

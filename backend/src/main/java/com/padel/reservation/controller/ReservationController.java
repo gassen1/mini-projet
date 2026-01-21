@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.padel.reservation.dto.DashboardStats;
 import java.util.List;
 
 @RestController
@@ -20,6 +21,12 @@ public class ReservationController {
 
     public ReservationController(ReservationService service) {
         this.service = service;
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DashboardStats> getStats() {
+        return ResponseEntity.ok(service.getDashboardStats());
     }
 
     @PostMapping

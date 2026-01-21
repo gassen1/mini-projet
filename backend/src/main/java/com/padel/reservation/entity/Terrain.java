@@ -15,16 +15,18 @@ public class Terrain {
     private String localisation;
     private Double prix;
     private String etat; // e.g., "DISPONIBLE", "MAINTENANCE"
+    private String imageUrl;
 
     public Terrain() {}
 
-    public Terrain(Long id, String nom, String description, String localisation, Double prix, String etat) {
+    public Terrain(Long id, String nom, String description, String localisation, Double prix, String etat, String imageUrl) {
         this.id = id;
         this.nom = nom;
         this.description = description;
         this.localisation = localisation;
         this.prix = prix;
         this.etat = etat;
+        this.imageUrl = imageUrl;
     }
 
     public static TerrainBuilder builder() {
@@ -38,6 +40,7 @@ public class Terrain {
         private String localisation;
         private Double prix;
         private String etat;
+        private String imageUrl;
 
         public TerrainBuilder id(Long id) { this.id = id; return this; }
         public TerrainBuilder nom(String nom) { this.nom = nom; return this; }
@@ -45,9 +48,10 @@ public class Terrain {
         public TerrainBuilder localisation(String localisation) { this.localisation = localisation; return this; }
         public TerrainBuilder prix(Double prix) { this.prix = prix; return this; }
         public TerrainBuilder etat(String etat) { this.etat = etat; return this; }
+        public TerrainBuilder imageUrl(String imageUrl) { this.imageUrl = imageUrl; return this; }
 
         public Terrain build() {
-            return new Terrain(id, nom, description, localisation, prix, etat);
+            return new Terrain(id, nom, description, localisation, prix, etat, imageUrl);
         }
     }
 
@@ -63,4 +67,6 @@ public class Terrain {
     public void setPrix(Double prix) { this.prix = prix; }
     public String getEtat() { return etat; }
     public void setEtat(String etat) { this.etat = etat; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

@@ -4,9 +4,12 @@ C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\entity\Terrain.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\config\ApplicationConfig.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\service\ReservationService.java
+C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\exception\GlobalExceptionHandler.java
+C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\service\UserService.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\controller\StatisticsController.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\dto\ReservationRequest.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\repository\ReservationRepository.java
+C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\controller\UserController.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\dto\AuthenticationRequest.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\entity\Promotion.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\dto\AuthenticationResponse.java
@@ -23,7 +26,9 @@ C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\controller\AuthenticationController.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\repository\PromotionRepository.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\repository\UserRepository.java
+C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\scheduler\ReservationScheduler.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\entity\Creneau.java
+C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\dto\DashboardStats.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\config\DataInitializer.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\entity\User.java
 C:\Users\LENOVO\Desktop\mini-projet\backend\src\main\java\com\padel\reservation\controller\ReservationController.java

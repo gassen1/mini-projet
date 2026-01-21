@@ -32,6 +32,10 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse register(RegisterRequest request) {
+        if (repository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already in use");
+        }
+
         String finalPassword = (request.getPassword() != null && !request.getPassword().isEmpty()) 
                 ? request.getPassword() 
                 : UUID.randomUUID().toString().substring(0, 8);
@@ -46,16 +50,16 @@ public class AuthenticationService {
                 .build();
         repository.save(user);
         
-        System.out.println("Generated password for " + request.getEmail() + " is: " + finalPassword);
+        System.out.println("User registered: " + request.getEmail());
+        
         try {
-            // emailService.sendEmail(
-            //    request.getEmail(), 
-            //    "Your Padel Reservation Credentials", 
-            //    "Hello " + request.getNom() + ",\n\nYour account has been created. Your login credentials are:\nEmail: " + request.getEmail() + "\nPassword: " + finalPassword + "\n\nRegards,\nPadel Team"
-            // );
-            System.out.println("Email simulation: Would send to " + request.getEmail());
+            emailService.sendEmail(
+                user.getEmail(),
+                "Welcome to PadelPRO!",
+                "Hello " + user.getNom() + ",\n\nYour account has been successfully created. You can now log in to reserve your favorite courts.\n\nBest regards,\nThe PadelPRO Team"
+            );
         } catch (Exception e) {
-            System.err.println("Could not send email to " + request.getEmail() + ": " + e.getMessage());
+            System.err.println("Failed to send welcome email: " + e.getMessage());
         }
 
         var jwtToken = jwtService.generateToken(user);

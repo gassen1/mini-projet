@@ -15,11 +15,15 @@ com\padel\reservation\security\JwtAuthenticationFilter.class
 com\padel\reservation\config\SecurityConfiguration.class
 com\padel\reservation\service\CreneauService.class
 com\padel\reservation\controller\CreneauController.class
+com\padel\reservation\controller\UserController.class
 com\padel\reservation\entity\Role.class
 com\padel\reservation\controller\TerrainController.class
 com\padel\reservation\entity\Terrain.class
 com\padel\reservation\service\EmailService.class
+com\padel\reservation\service\UserService.class
+com\padel\reservation\dto\DashboardStats.class
 com\padel\reservation\ReservationApplication.class
+com\padel\reservation\scheduler\ReservationScheduler.class
 com\padel\reservation\dto\RegisterRequest.class
 com\padel\reservation\controller\PromotionController.class
 com\padel\reservation\entity\User.class
@@ -35,6 +39,7 @@ com\padel\reservation\controller\ReservationController.class
 com\padel\reservation\entity\Promotion.class
 com\padel\reservation\service\AuthenticationService.class
 com\padel\reservation\config\DataInitializer.class
+com\padel\reservation\exception\GlobalExceptionHandler.class
 com\padel\reservation\repository\ReservationRepository.class
 com\padel\reservation\dto\AuthenticationRequest.class
 com\padel\reservation\entity\Creneau$CreneauBuilder.class

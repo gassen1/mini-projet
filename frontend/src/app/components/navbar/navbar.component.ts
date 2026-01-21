@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Role } from '../../models/user.model';
+import { ThemeService } from '../../services/theme.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -36,7 +38,12 @@ import { Role } from '../../models/user.model';
             </li>
           </ul>
           
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-3">
+            <!-- Dark Mode Toggle -->
+            <button class="btn btn-theme-toggle rounded-circle p-2 d-flex align-items-center justify-content-center" (click)="toggleTheme()">
+              <i class="fas" [class.fa-moon]="!(isDarkMode$ | async)" [class.fa-sun]="isDarkMode$ | async"></i>
+            </button>
+
             <ng-container *ngIf="!isAuthenticated()">
               <a class="btn btn-login px-4" routerLink="/login">Sign In</a>
               <a class="btn btn-primary rounded-pill px-4 shadow-sm" routerLink="/register">Get Started</a>
@@ -48,6 +55,8 @@ import { Role } from '../../models/user.model';
                 <span class="d-none d-md-inline small fw-bold">{{ currentUserEmail }}</span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" [class.show]="isDropdownOpen">
+                <li><a class="dropdown-item py-2" routerLink="/profile" (click)="isDropdownOpen=false"><i class="fas fa-user-circle me-2 text-primary"></i> My Profile</a></li>
+                <li><hr class="dropdown-divider opacity-10"></li>
                 <li><a class="dropdown-item py-2" (click)="logout(); $event.preventDefault()" style="cursor: pointer;"><i class="fas fa-sign-out-alt me-2 text-danger"></i> Logout</a></li>
               </ul>
             </div>
@@ -57,7 +66,10 @@ import { Role } from '../../models/user.model';
     </nav>
   `,
   styles: [`
-    .main-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(0,0,0,0.05); padding: 15px 0; z-index: 1000; }
+    .main-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border-color); padding: 15px 0; z-index: 1000; transition: all 0.3s; }
+    :host-context(.dark-mode) .main-nav { background: rgba(15, 23, 42, 0.8); }
+    .btn-theme-toggle { background: #f1f2f6; color: #1a1c23; border: none; width: 40px; height: 40px; }
+    :host-context(.dark-mode) .btn-theme-toggle { background: #1e293b; color: #f8fafc; }
     .brand-text { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 1.5rem; letter-spacing: -0.5px; color: var(--dark); }
     .logo-box { background: var(--primary); color: white; width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transform: rotate(-10deg); transition: 0.3s; }
     .navbar-brand:hover .logo-box { transform: rotate(0deg) scale(1.1); }
@@ -76,8 +88,15 @@ import { Role } from '../../models/user.model';
 })
 export class NavbarComponent {
   isDropdownOpen = false;
+  isDarkMode$: Observable<boolean>;
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private themeService: ThemeService) {
+    this.isDarkMode$ = this.themeService.darkMode$;
+  }
+
+  toggleTheme() {
+    this.themeService.toggleDarkMode();
+  }
 
   get currentUserEmail() {
     return this.authService.currentUserValue?.email;

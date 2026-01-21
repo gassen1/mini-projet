@@ -9,6 +9,7 @@ import { HttpClient } from '@angular/common/http';
 import { PromotionService } from '../../services/promotion.service';
 import { Promotion } from '../../models/promotion.model';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -47,9 +48,15 @@ import { FormsModule } from '@angular/forms';
             <div class="row g-4">
               <div class="col-md-6" *ngFor="let terrain of terrains">
                 <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden court-card">
+                  <!-- Terrain Image -->
+                  <div class="court-img-container position-relative">
+                    <img [src]="terrain.imageUrl || 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?auto=format&fit=crop&q=80&w=800'" class="card-img-top court-img" alt="Court">
+                    <div class="price-tag">{{ terrain.prix }} DT/h</div>
+                  </div>
+                  
                   <div class="card-header border-0 bg-transparent p-4 pb-0">
                     <div class="d-flex justify-content-between align-items-center">
-                      <div class="price-tag">{{ terrain.prix }} DT/h</div>
+                      <h4 class="fw-bold m-0 text-dark">{{ terrain.nom }}</h4>
                       <div class="badge fw-bold" [ngClass]="{
                         'bg-soft-success text-success': terrain.etat === 'DISPONIBLE',
                         'bg-soft-warning text-warning': terrain.etat === 'MAINTENANCE',
@@ -127,19 +134,22 @@ import { FormsModule } from '@angular/forms';
                       <span class="total-price">{{ calculateTotal() | number:'1.2-2' }} DT</span>
                     </div>
 
-                    <!-- Promo Code Section -->
-                    <div class="mb-4">
-                      <div class="d-flex">
-                         <input type="text" class="form-control me-2" placeholder="Promo Code" [(ngModel)]="codePromo">
-                         <button class="btn btn-sm btn-outline-primary" (click)="validatePromo()" [disabled]="!codePromo">Apply</button>
+                    <!-- Loyalty Progress -->
+                    <div class="card bg-light border-0 p-3 mb-4 rounded-3" *ngIf="confirmedMatchesCount < 5">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small fw-bold text-muted">Loyalty Progress</span>
+                        <span class="small text-primary fw-bold">{{ confirmedMatchesCount }}/5</span>
                       </div>
-                      <div *ngIf="currentPromotion" class="text-success small mt-1">
-                        -{{ currentPromotion.pourcentageReduction * 100 }}% applied!
+                      <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" [style.width.%]="confirmedMatchesCount * 20"></div>
                       </div>
-                      <div *ngIf="promoError" class="text-danger small mt-1">
-                        {{ promoError }}
-                      </div>
+                      <p class="x-small text-muted mt-2 mb-0">Get 10% off after 5 confirmed matches!</p>
                     </div>
+                    <div class="alert alert-success d-flex align-items-center border-0 rounded-3 mb-4" *ngIf="confirmedMatchesCount >= 5">
+                      <i class="fas fa-crown text-warning me-2 fs-5"></i>
+                      <div class="small fw-bold">10% Loyalty Discount Applied!</div>
+                    </div>
+
                     <button class="btn btn-primary-gradient w-100 py-3 fw-bold rounded-3 shadow-lg fs-5" (click)="confirmBooking()" [disabled]="bookingLoading">
                       <span *ngIf="bookingLoading" class="spinner-border spinner-border-sm me-2"></span>
                       {{ bookingLoading ? 'PROCESSING...' : 'CONFIRM BOOKING' }}
@@ -253,6 +263,13 @@ import { FormsModule } from '@angular/forms';
     
     .ls-1 { letter-spacing: 1px; }
     .x-small { font-size: 0.7rem; }
+    
+    .court-card { transition: transform 0.3s, box-shadow 0.3s; }
+    .court-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .court-img-container { height: 200px; overflow: hidden; }
+    .court-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .court-card:hover .court-img { transform: scale(1.1); }
+    .price-tag { background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 800; font-size: 0.9rem; position: absolute; bottom: 15px; left: 15px; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .view-content { animation: fadeIn 0.5s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -270,6 +287,8 @@ export class UserDashboardComponent implements OnInit {
   currentPromotion: Promotion | null = null;
   promoError: string = '';
 
+  confirmedMatchesCount = 0;
+
   constructor(
     private terrainService: TerrainService,
     private reservationService: ReservationService,
@@ -279,6 +298,10 @@ export class UserDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadTerrains();
+    this.loadMyReservations();
+    setTimeout(() => {
+      this.confirmedMatchesCount = this.myReservations.filter(r => r.statut === 'CONFIRMEE').length;
+    }, 1000);
   }
 
   loadTerrains() {
@@ -357,14 +380,20 @@ export class UserDashboardComponent implements OnInit {
     const ids = this.selectedSlots.map(s => s.id!);
     this.reservationService.createReservation(ids, this.currentPromotion ? this.codePromo : undefined).subscribe({
       next: () => {
-        alert('Reservation submitted successfully! Your booking is now PENDING administrator approval.');
+        Swal.fire({
+          icon: 'success',
+          title: 'Reservation Submitted!',
+          text: 'Your booking is now PENDING administrator approval. You will receive a notification once validated.',
+          confirmButtonColor: '#4834d4'
+        });
         this.selectedSlots = [];
         this.bookingLoading = false;
         this.loadTerrains();
-        if (this.activeTab === 'my-reservations') this.loadMyReservations();
+        this.loadMyReservations();
       },
-      error: () => {
-        alert('Error creating reservation. One of your selected slots might have been taken just now.');
+      error: (err) => {
+        const msg = err?.message || 'One of your selected slots might have been taken just now.';
+        Swal.fire('Error', msg, 'error');
         this.bookingLoading = false;
       }
     });

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Reservation, StatutReservation } from '../models/reservation.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ReservationService {
-    private apiUrl = 'http://localhost:8081/api/reservations';
+    private apiUrl = `${environment.apiUrl}/reservations`;
 
     constructor(private http: HttpClient) { }
 
@@ -29,5 +30,9 @@ export class ReservationService {
 
     cancelReservation(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
+
+    getStats(): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/stats`);
     }
 }

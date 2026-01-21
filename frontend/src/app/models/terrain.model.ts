@@ -5,4 +5,5 @@ export interface Terrain {
     localisation: string;
     prix: number;
     etat?: string;
+    imageUrl?: string;
 }

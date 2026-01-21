@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-register',
@@ -91,17 +92,22 @@ export class RegisterComponent {
   constructor(private authService: AuthService) { }
 
   onSubmit() {
+    if (!this.email || !this.password) {
+      this.error = 'Please fill in all fields';
+      return;
+    }
     this.loading = true;
     this.error = '';
-    this.authService.register(this.nom, this.prenom, this.email, this.telephone, this.password).subscribe({
-      next: () => {
-        this.success = true;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Registration failed. Email might already be in use.';
-        this.loading = false;
-      }
-    });
+    this.authService.register(this.nom, this.prenom, this.email, this.telephone, this.password)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: () => {
+          this.success = true;
+        },
+        error: (err) => {
+          console.error('Registration error:', err);
+          this.error = typeof err === 'string' ? err : 'Registration failed. Email might already be in use.';
+        }
+      });
   }
 }

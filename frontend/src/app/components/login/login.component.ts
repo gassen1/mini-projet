@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Role } from '../../models/user.model';
+import { finalize } from 'rxjs/operators';
 
 @Component({
-    selector: 'app-login',
-    standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule],
-    template: `
+  selector: 'app-login',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
+  template: `
     <div class="container h-100 mt-5">
       <div class="row justify-content-center align-items-center h-100">
         <div class="col-md-5">
@@ -49,35 +50,37 @@ import { Role } from '../../models/user.model';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .form-control:focus { box-shadow: none; border-color: #0d6efd; }
     .input-group-text { border-right: none; }
     .rounded-4 { border-radius: 1.5rem !important; }
   `]
 })
 export class LoginComponent {
-    email = '';
-    password = '';
-    loading = false;
-    error = '';
+  email = '';
+  password = '';
+  loading = false;
+  error = '';
 
-    constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
-    onSubmit() {
-        this.loading = true;
-        this.error = '';
-        this.authService.login(this.email, this.password).subscribe({
-            next: (user) => {
-                if (user.role === Role.ADMIN) {
-                    this.router.navigate(['/admin']);
-                } else {
-                    this.router.navigate(['/dashboard']);
-                }
-            },
-            error: (err) => {
-                this.error = 'Invalid email or password';
-                this.loading = false;
-            }
-        });
-    }
+  onSubmit() {
+    this.loading = true;
+    this.error = '';
+    this.authService.login(this.email, this.password)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (user) => {
+          if (user.role === Role.ADMIN) {
+            this.router.navigate(['/admin']);
+          } else {
+            this.router.navigate(['/dashboard']);
+          }
+        },
+        error: (err) => {
+          console.error('Login error:', err);
+          this.error = typeof err === 'string' ? err : 'Invalid email or password';
+        }
+      });
+  }
 }

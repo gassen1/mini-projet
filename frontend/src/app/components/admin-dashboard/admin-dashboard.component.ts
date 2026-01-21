@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TerrainService } from '../../services/terrain.service';
 import { ReservationService } from '../../services/reservation.service';
-import { Reservation, StatutReservation } from '../../models/reservation.model';
-import { Terrain } from '../../models/terrain.model';
-import { FormsModule } from '@angular/forms';
-import { Creneau } from '../../models/creneau.model';
 import { CreneauService } from '../../services/creneau.service';
+import { Terrain } from '../../models/terrain.model';
+import { Reservation, StatutReservation } from '../../models/reservation.model';
+import { Creneau } from '../../models/creneau.model';
+import Chart from 'chart.js/auto';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -36,7 +40,42 @@ import { CreneauService } from '../../services/creneau.service';
                   <i class="fas fa-calendar-check me-2"></i>Bookings
                   <span class="badge-dot" *ngIf="pendingCount > 0"></span>
                 </button>
+                <button class="btn btn-nav px-4 py-2 rounded-pill" (click)="view = 'analytics'; loadStats()" [class.active]="view === 'analytics'">
+                  <i class="fas fa-chart-pie me-2"></i>Analytics
+                </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS VIEW -->
+      <div *ngIf="view === 'analytics'" class="view-content animate-fade-in">
+        <div class="row g-4 mb-4" *ngIf="stats">
+          <div class="col-md-3">
+            <div class="card p-4 border-0 shadow-sm text-center bg-primary text-white">
+              <div class="opacity-75 small text-uppercase fw-bold mb-1">Total Bookings</div>
+              <div class="display-5 fw-black">{{ stats.totalReservations }}</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card p-4 border-0 shadow-sm text-center bg-success text-white">
+              <div class="opacity-75 small text-uppercase fw-bold mb-1">Total Revenue</div>
+              <div class="display-5 fw-black">{{ stats.totalRevenue | number:'1.0-0' }}€</div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card p-4 border-0 shadow-lg rounded-4 h-100">
+              <h5 class="fw-bold mb-4">Bookings by Status</h5>
+              <div style="height: 300px;"><canvas id="statusChart"></canvas></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card p-4 border-0 shadow-lg rounded-4 h-100">
+              <h5 class="fw-bold mb-4">Monthly Revenue</h5>
+              <div style="height: 300px;"><canvas id="revenueChart"></canvas></div>
             </div>
           </div>
         </div>
@@ -195,8 +234,18 @@ import { CreneauService } from '../../services/creneau.service';
       <!-- RESERVATIONS MANAGEMENT -->
       <div *ngIf="view === 'reservations'" class="view-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h3 class="fw-bold m-0 text-dark">Recent Bookings</h3>
-          <div class="badge bg-soft-primary text-primary px-3 py-2">{{ pendingCount }} Pending Approval</div>
+          <div class="d-flex align-items-center gap-3">
+            <h3 class="fw-bold m-0 text-dark">Recent Bookings</h3>
+            <div class="badge bg-soft-primary text-primary px-3 py-2">{{ pendingCount }} Pending Approval</div>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-danger btn-sm rounded-3 px-3" (click)="exportToPDF()">
+              <i class="fas fa-file-pdf me-2"></i>Export PDF
+            </button>
+            <button class="btn btn-outline-success btn-sm rounded-3 px-3" (click)="exportToExcel()">
+              <i class="fas fa-file-excel me-2"></i>Export Excel
+            </button>
+          </div>
         </div>
 
         <div class="card border-0 shadow-lg rounded-4 overflow-hidden booking-table-card">
@@ -353,11 +402,14 @@ import { CreneauService } from '../../services/creneau.service';
   `]
 })
 export class AdminDashboardComponent implements OnInit {
-  view: 'terrains' | 'reservations' | 'slots' = 'terrains';
+  view: 'terrains' | 'reservations' | 'slots' | 'analytics' = 'terrains';
   terrains: Terrain[] = [];
   reservations: Reservation[] = [];
   allSlots: Creneau[] = [];
   pendingCount = 0;
+  stats: any = null;
+  private statusChart: any;
+  private revenueChart: any;
   selectedTerrainId: number | null = null;
 
   // Forms
@@ -466,5 +518,83 @@ export class AdminDashboardComponent implements OnInit {
     this.reservationService.updateStatus(id, status as StatutReservation).subscribe(() => {
       this.loadReservations();
     });
+  }
+
+  loadStats() {
+    this.reservationService.getStats().subscribe(data => {
+      this.stats = data;
+      if (this.view === 'analytics') {
+        this.initCharts();
+      }
+    });
+  }
+
+  initCharts() {
+    setTimeout(() => {
+      const statusCtx = document.getElementById('statusChart') as HTMLCanvasElement;
+      const revenueCtx = document.getElementById('revenueChart') as HTMLCanvasElement;
+
+      if (this.statusChart) this.statusChart.destroy();
+      if (this.revenueChart) this.revenueChart.destroy();
+
+      if (statusCtx && this.stats) {
+        this.statusChart = new Chart(statusCtx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(this.stats.reservationsByStatus),
+            datasets: [{
+              data: Object.values(this.stats.reservationsByStatus),
+              backgroundColor: ['#f7b731', '#20bf6b', '#eb3b9e']
+            }]
+          },
+          options: { plugins: { legend: { position: 'bottom' } } }
+        });
+      }
+
+      if (revenueCtx && this.stats) {
+        this.revenueChart = new Chart(revenueCtx, {
+          type: 'bar',
+          data: {
+            labels: Object.keys(this.stats.revenueByMonth),
+            datasets: [{
+              label: 'Revenue (€)',
+              data: Object.values(this.stats.revenueByMonth),
+              backgroundColor: '#4834d4',
+              borderRadius: 8
+            }]
+          }
+        });
+      }
+    }, 100);
+  }
+
+  exportToPDF() {
+    const doc = new jsPDF();
+    doc.text('PadelPRO - Reservation Report', 14, 15);
+    autoTable(doc, {
+      head: [['ID', 'User', 'Date', 'Price', 'Status']],
+      body: this.reservations.map(r => [
+        (r.id || '').toString(),
+        r.adherent?.email || '',
+        r.dateReservation ? new Date(r.dateReservation).toLocaleDateString() : '',
+        (Math.round(r.prixFinal || 0)) + '€',
+        r.statut || ''
+      ]),
+      startY: 25
+    });
+    doc.save('reservations_report.pdf');
+  }
+
+  exportToExcel() {
+    const worksheet = XLSX.utils.json_to_sheet(this.reservations.map(r => ({
+      ID: r.id || 0,
+      User: r.adherent?.email || '',
+      Date: r.dateReservation || '',
+      Price: r.prixFinal || 0,
+      Status: r.statut || ''
+    })));
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reservations');
+    XLSX.writeFile(workbook, 'reservations_report.xlsx');
   }
 }

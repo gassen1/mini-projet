@@ -11,14 +11,38 @@
   --dark: #130f40;
   --light: #f8faff;
   --gray: #95afc0;
+  --card-bg: #ffffff;
+  --text-main: #130f40;
+  --text-muted: #95afc0;
+  --border-color: #ededed;
+}
+
+.dark-mode {
+  --light: #0f172a;
+  --dark: #f8faff;
+  --card-bg: #1e293b;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  background-color: #0f172a;
 }
 
 body {
   background-color: var(--light);
-  font-family: 'Inter', sans-serif;
-  color: var(--dark);
-  -webkit-font-smoothing: antialiased;
-  margin: 0;
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card {
+  background-color: var(--card-bg) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* SweetAlert2 Dark Mode Helper */
+.swal2-popup {
+  background-color: var(--card-bg) !important;
+  color: var(--text-main) !important;
 }
 
 h1,
