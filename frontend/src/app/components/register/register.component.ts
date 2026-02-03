@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -89,24 +89,38 @@ export class RegisterComponent {
   success = false;
   error = '';
 
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private cdr: ChangeDetectorRef) { }
 
   onSubmit() {
-    if (!this.email || !this.password) {
+    if (!this.nom || !this.prenom || !this.email || !this.telephone || !this.password) {
       this.error = 'Please fill in all fields';
       return;
     }
     this.loading = true;
     this.error = '';
+    this.success = false;
+
     this.authService.register(this.nom, this.prenom, this.email, this.telephone, this.password)
-      .pipe(finalize(() => this.loading = false))
       .subscribe({
-        next: () => {
+        next: (response) => {
+          console.log('Registration successful:', response);
+          this.loading = false;
           this.success = true;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Registration error:', err);
-          this.error = typeof err === 'string' ? err : 'Registration failed. Email might already be in use.';
+          this.loading = false;
+          this.cdr.detectChanges();
+          if (err.error && err.error.message) {
+            this.error = err.error.message;
+          } else if (err.status === 409) {
+            this.error = 'Email already exists. Please use a different email.';
+          } else if (err.status === 400) {
+            this.error = 'Invalid data. Please check your information.';
+          } else {
+            this.error = 'Registration failed. Please try again later.';
+          }
         }
       });
   }

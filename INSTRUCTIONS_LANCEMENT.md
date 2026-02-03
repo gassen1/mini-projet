@@ -12,18 +12,29 @@ Le point le plus critique est la connexion à la base de données.
 Le fichier de configuration se trouve ici :
 `backend/src/main/resources/application.properties`
 
+### 📊 URL de la Base de Données
+```
+jdbc:mysql://127.0.0.1:3306/padel_db
+```
+
+### Paramètres de Connexion
+```
+Host:     127.0.0.1
+Port:     3306
+Database: padel_db
+Username: root
+Password: root
+```
+
 ### Vérification du Mot de Passe
 Par défaut, la configuration est :
 ```properties
 spring.datasource.username=root
-spring.datasource.password=
+spring.datasource.password=root
 ```
-👉 **Si votre MySQL a un mot de passe** (ce qui semble être le cas d'après les erreurs `Access denied`), vous DEVEZ l'ajouter dans ce fichier après `spring.datasource.password=`.
+👉 **Si votre MySQL a un mot de passe différent**, vous DEVEZ le modifier dans le fichier `application.properties`.
 
-Exemple si votre mot de passe est "root" :
-`spring.datasource.password=root`
-
-*Si vous utilisez WAMP sans mot de passe, laissez le champ vide.*
+*Si vous utilisez WAMP sans mot de passe, mettez `spring.datasource.password=` (vide).*
 
 ## 3. Lancement du Backend (Serveur API) 🐘
 1. Ouvrez un terminal dans le dossier `backend`.

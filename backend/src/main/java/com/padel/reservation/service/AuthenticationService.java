@@ -55,8 +55,14 @@ public class AuthenticationService {
         try {
             emailService.sendEmail(
                 user.getEmail(),
-                "Welcome to PadelPRO!",
-                "Hello " + user.getNom() + ",\n\nYour account has been successfully created. You can now log in to reserve your favorite courts.\n\nBest regards,\nThe PadelPRO Team"
+                "Bienvenue sur PadelPRO - Vos identifiants",
+                "Bonjour " + user.getNom() + ",\n\n" +
+                "Votre compte a été créé avec succès. Voici vos identifiants de connexion :\n\n" +
+                "📧 Email : " + user.getEmail() + "\n" +
+                "🔑 Mot de passe : " + finalPassword + "\n\n" +
+                "Vous pouvez maintenant vous connecter pour réserver vos terrains.\n\n" +
+                "Cordialement,\n" +
+                "L'équipe PadelPRO"
             );
         } catch (Exception e) {
             System.err.println("Failed to send welcome email: " + e.getMessage());
